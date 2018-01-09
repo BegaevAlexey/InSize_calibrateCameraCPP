@@ -1,0 +1,55 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_028c4/fast"
+/usr/bin/make -f CMakeFiles/cmTC_028c4.dir/build.make CMakeFiles/cmTC_028c4.dir/build
+make[1]: вход в каталог «/home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp»
+Building C object CMakeFiles/cmTC_028c4.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -fPIC    -o CMakeFiles/cmTC_028c4.dir/CheckSymbolExists.c.o   -c /home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_028c4
+/home/alexey/Загрузки/clion-2017.3.1/bin/cmake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_028c4.dir/link.txt --verbose=1
+/usr/bin/cc -fPIC     CMakeFiles/cmTC_028c4.dir/CheckSymbolExists.c.o  -o cmTC_028c4 
+CMakeFiles/cmTC_028c4.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x1b): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_028c4.dir/build.make:97: ошибка выполнения рецепта для цели «cmTC_028c4»
+make[1]: *** [cmTC_028c4] Ошибка 1
+make[1]: выход из каталога «/home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp»
+Makefile:126: ошибка выполнения рецепта для цели «cmTC_028c4/fast»
+make: *** [cmTC_028c4/fast] Ошибка 2
+
+File /home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_279c8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_279c8.dir/build.make CMakeFiles/cmTC_279c8.dir/build
+make[1]: вход в каталог «/home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp»
+Building C object CMakeFiles/cmTC_279c8.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -fPIC -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_279c8.dir/CheckFunctionExists.c.o   -c /home/alexey/Загрузки/clion-2017.3.1/bin/cmake/share/cmake-3.9/Modules/CheckFunctionExists.c
+Linking C executable cmTC_279c8
+/home/alexey/Загрузки/clion-2017.3.1/bin/cmake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_279c8.dir/link.txt --verbose=1
+/usr/bin/cc -fPIC -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_279c8.dir/CheckFunctionExists.c.o  -o cmTC_279c8 -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_279c8.dir/build.make:97: ошибка выполнения рецепта для цели «cmTC_279c8»
+make[1]: *** [cmTC_279c8] Ошибка 1
+make[1]: выход из каталога «/home/alexey/work/programming/opencv_projects/calibrateCameraCPP/cmake-build-debug/CMakeFiles/CMakeTmp»
+Makefile:126: ошибка выполнения рецепта для цели «cmTC_279c8/fast»
+make: *** [cmTC_279c8/fast] Ошибка 2
+
+
