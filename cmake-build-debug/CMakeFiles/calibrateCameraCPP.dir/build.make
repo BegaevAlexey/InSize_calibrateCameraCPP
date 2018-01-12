@@ -121,6 +121,12 @@ calibrateCameraCPP: /usr/local/lib/libopencv_xfeatures2d.so.3.4.0
 calibrateCameraCPP: /usr/local/lib/libopencv_ximgproc.so.3.4.0
 calibrateCameraCPP: /usr/local/lib/libopencv_xobjdetect.so.3.4.0
 calibrateCameraCPP: /usr/local/lib/libopencv_xphoto.so.3.4.0
+calibrateCameraCPP: /usr/local/lib/libboost_thread.a
+calibrateCameraCPP: /usr/local/lib/libboost_filesystem.a
+calibrateCameraCPP: /usr/local/lib/libboost_chrono.a
+calibrateCameraCPP: /usr/local/lib/libboost_system.a
+calibrateCameraCPP: /usr/local/lib/libboost_date_time.a
+calibrateCameraCPP: /usr/local/lib/libboost_atomic.a
 calibrateCameraCPP: /usr/local/lib/libopencv_cudafeatures2d.so.3.4.0
 calibrateCameraCPP: /usr/local/lib/libopencv_cudacodec.so.3.4.0
 calibrateCameraCPP: /usr/local/lib/libopencv_cudaoptflow.so.3.4.0

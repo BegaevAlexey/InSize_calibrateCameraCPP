@@ -7,17 +7,20 @@
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <boost/filesystem.hpp>
+
 
 // the function of information
 void help(char **argv);
 
 /*MAIN FUNCTION*/
 int main(int argc, char *argv[]) {
-    int n_boards = 0;           // will be set by input list
+
+    unsigned int n_boards = 0;  // will be set by input list
     float image_sf = 0.5f;      // image scaling factor
     float delay = 1.f;
-    int board_w = 0;
-    int board_h = 0;
+    unsigned int board_w = 0L;
+    unsigned int board_h = 0L;
 
     if (argc < 4 || argc > 6) {
         std::cout << "\nERROR: Wrong number of input parameters\n";
@@ -25,9 +28,12 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    board_w = atoi(argv[1]);
-    board_h = atoi(argv[2]);
-    n_boards = atoi(argv[3]);
+    // count of corners of chessboard
+    board_w = (unsigned int)atoi(argv[1]);
+    board_h = (unsigned int)atoi(argv[2]);
+
+    // count good images of chessboard
+    n_boards = (unsigned int)atoi(argv[3]);
 
     if (argc > 4) {
         delay = atof(argv[4]);
@@ -36,13 +42,27 @@ int main(int argc, char *argv[]) {
         image_sf = atof(argv[5]);
     }
 
-    int board_n = board_w * board_h;
+    unsigned long board_n;
+    board_n = board_w * board_h;
     cv::Size board_sz = cv::Size(board_w, board_h);
-    cv::VideoCapture capture(0);
-    if (!capture.isOpened()) {
-        std::cout << "\nCouldn't open the camera\n";
-        help(argv);
-        return -1;
+
+    // GET FILENAME
+    std::stringstream ss;
+    std::string str;
+    std::stack<std::string> nameFales;
+    std::string pathDirectory ("../../data_for_projects/chesboard_112_2560x1140");
+    for (boost::filesystem::recursive_directory_iterator it(pathDirectory), end; it != end; ++it) {
+        if (it->path().extension() == ".jpg") {
+            // get name file with path file
+            ss << *it;
+            // create name file
+            str = ss.str();
+            str = str.substr(1, str.size()-2);
+            // add stack
+            nameFales.push(str);
+            // clear string stream
+            ss.str(std::string());
+        }
     }
 
     // ALLOCATE STORAGE
@@ -55,16 +75,21 @@ int main(int argc, char *argv[]) {
     //
     double last_captured_timestamp = 0;
     cv::Size image_size;
-    while (image_points.size() < (size_t)n_boards) {
-        cv::Mat image0, image;
-        capture >> image0;
+    cv::Mat image0, image;
+    unsigned long counter = 0;
+
+    while (image_points.size() < (size_t)n_boards && !nameFales.empty()) {
+
+        image0 = cv::imread(nameFales.top());
+        nameFales.pop();
+
         image_size = image0.size();
         cv::resize(image0, image, cv::Size(), image_sf, image_sf, cv::INTER_LINEAR);
 
         // Find the board
         //
         std::vector<cv::Point2f> corners;
-        bool found = cv::findChessboardCorners(image, board_sz, corners);
+        bool found = cv::findChessboardCorners(image, board_sz, corners, cv::CALIB_CB_FAST_CHECK);
 
         // Draw it
         //
@@ -72,9 +97,7 @@ int main(int argc, char *argv[]) {
 
         // If we got a good board, add it to our data
         //
-        double timestamp = static_cast<double>(clock()) / CLOCKS_PER_SEC;
-        if (found && timestamp - last_captured_timestamp > 1) {
-            last_captured_timestamp = timestamp;
+        if (found) {
             image ^= cv::Scalar::all(255);
             cv::Mat mcorners(corners);
 
@@ -88,21 +111,15 @@ int main(int argc, char *argv[]) {
 
             opts.resize(board_n);
             for (int j = 0; j < board_n; j++) {
-                opts[j] = cv::Point3f(static_cast<float>(j / board_w),
-                                      static_cast<float>(j % board_w), 0.0f);
+                opts[j] = cv::Point3f((float)(j / board_w),
+                                      (float)(j % board_w), 0.0f);
             }
-            std::cout << "Collected our " << static_cast<uint>(image_points.size())
+            std::cout << "Collected our " << (int)image_points.size()
                       << " of " << n_boards << " needed chessboard images\n" << std::endl;
         }
-        cv::imshow("Calibration", image);
-
-        // show in color if we did collect the image
-        if ((cv::waitKey(30) & 255) == 27)
-            return -1;
     }
-
     // END COLLECTION WHILE LOOP.
-    cv::destroyWindow("Calibration");
+
     std::cout << "\n\n*** CALIBRATING THE CAMERA...\n" << std::endl;
 
     // CALIBRATE THE CAMERA!
@@ -114,7 +131,7 @@ int main(int argc, char *argv[]) {
             cv::CALIB_ZERO_TANGENT_DIST | cv::CALIB_FIX_PRINCIPAL_POINT);
 
     // SAVE THE INTRINSICS AND DISTORTIONS
-    std::cout << " *** DONE!\n\nReprojection error is " << err
+    std::cout << "*** DONE!\n\nReprojection error is " << err
          << "\nStoring Intrinsics.xml and Distortions.xml files\n\n";
     cv::FileStorage fs("intrinsics.xml", cv::FileStorage::WRITE);
     fs << "image_width" << image_size.width << "image_height" << image_size.height
@@ -124,39 +141,13 @@ int main(int argc, char *argv[]) {
 
     // EXAMPLE OF LOADING THESE MATRICES BACK IN:
     fs.open("intrinsics.xml", cv::FileStorage::READ);
-    std::cout << "\nimage width: " << static_cast<int>(fs["image_width"]);
-    std::cout << "\nimage height: " << static_cast<int>(fs["image_height"]);
+    std::cout << "\nimage width: " << (int)fs["image_width"];
+    std::cout << "\nimage height: " << (int)fs["image_height"];
     cv::Mat intrinsic_matrix_loaded, distortion_coeffs_loaded;
     fs["camera_matrix"] >> intrinsic_matrix_loaded;
     fs["distortion_coefficients"] >> distortion_coeffs_loaded;
-    std::cout << "\nintrinsic matrix:" << intrinsic_matrix_loaded;
+    std::cout << "\nintrinsic matrix:\n" << intrinsic_matrix_loaded;
     std::cout << "\ndistortion coefficients: " << distortion_coeffs_loaded << std::endl;
-
-    // Build the undistort map which we will use for all
-    // subsequent frames.
-    //
-    cv::Mat map1, map2;
-    cv::initUndistortRectifyMap(intrinsic_matrix_loaded, distortion_coeffs_loaded,
-                                cv::Mat(), intrinsic_matrix_loaded, image_size,
-                                CV_16SC2, map1, map2);
-
-    // Just run the camera to the screen, now showing the raw and
-    // the undistorted image.
-    //
-    for (;;) {
-        cv::Mat image, image0;
-        capture >> image0;
-
-        if (image0.empty()) {
-            break;
-        }
-        cv::remap(image0, image, map1, map2, cv::INTER_LINEAR,
-                  cv::BORDER_CONSTANT, cv::Scalar());
-        cv::imshow("Undistorted", image);
-        if ((cv::waitKey(30) & 255) == 27) {
-            break;
-        }
-    }
 
     return 0;
 }
@@ -164,8 +155,8 @@ int main(int argc, char *argv[]) {
 
 // the function of information
 void help(char **argv) {  // todo rewrite this
-    std::cout << "\n\n"
-              << "Example 18-1:\nReading a chessboard’s width and height,\n"
+    std::cout << "\n"
+              << "\nReading a chessboard’s width and height,\n"
               << "              reading and collecting the requested number of views,\n"
               << "              and calibrating the camera\n\n"
               << "Call:\n" << argv[0] << " <board_width> <board_height> <number_of_boards> <if_video,_delay_between_framee_capture> <image_scaling_factor>\n\n"
@@ -177,3 +168,4 @@ void help(char **argv) {  // todo rewrite this
               << " * It displays an undistorted image\n"
               << std::endl;
 }
+
